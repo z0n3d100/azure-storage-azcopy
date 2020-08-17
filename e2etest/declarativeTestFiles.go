@@ -23,13 +23,12 @@ package e2etest
 import (
 	"encoding/hex"
 	"fmt"
+	"github.com/Azure/azure-storage-azcopy/v10/cmd"
+	"github.com/Azure/azure-storage-azcopy/v10/common"
 	"math"
 	"reflect"
 	"strings"
 	"time"
-
-	"github.com/Azure/azure-storage-azcopy/cmd"
-	"github.com/Azure/azure-storage-azcopy/common"
 )
 
 ///////////////

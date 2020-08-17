@@ -23,7 +23,12 @@
 package e2etest
 
 import (
+<<<<<<< HEAD
 	"os"
+=======
+	"github.com/Azure/azure-storage-azcopy/v10/common"
+	"github.com/Azure/azure-storage-azcopy/v10/ste"
+>>>>>>> c33678aa... Fix module import problem for V10
 	"path/filepath"
 	"strings"
 	"syscall"
