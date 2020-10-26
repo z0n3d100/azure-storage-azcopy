@@ -146,6 +146,7 @@ github.com/ianlancetaylor/demangle v0.0.0-20181102032728-5e5cf60278f6/go.mod h1:
 github.com/inconshreveable/mousetrap v1.0.0 h1:Z8tu5sraLXCXIcARxBp/8cbvlwVa7Z1NHg9XEKhtSvM=
 github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=
 github.com/jiacfan/keychain v0.0.0-20180920053336-f2c902a3d807/go.mod h1:IGH0VO3mMxCgF6yPROjtYw4wnCO6EviEgJwiMeNHXdw=
+github.com/jiacfan/keyctl v0.3.1 h1:mpdRpuFeQHXnApGVvIUSavAxwElf7S4XcdLlCIDCXJA=
 github.com/jiacfan/keyctl v0.3.1/go.mod h1:GPrz+MB+TkX2uTBDoAKBaGTLTtr2+Y7VwOgEJ7O/jyY=
 github.com/jstemmer/go-junit-report v0.0.0-20190106144839-af01ea7f8024/go.mod h1:6v2b51hI/fHJwM22ozAgKL4VKDeJcHhJFhtBdhmNjmU=
 github.com/jstemmer/go-junit-report v0.9.1/go.mod h1:Brl9GWCQeLvo8nXZwPNNblvFj/XSXhF0NWZEnDohbsk=

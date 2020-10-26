@@ -69,11 +69,15 @@ func (c *urlToBlockBlobCopier) GenerateCopyFunc(id common.ChunkID, blockIndex in
 		return c.generateCreateEmptyBlob(id)
 	}
 
-	if c.NumChunks() == 1 && adjustedChunkSize <= int64(azblob.BlockBlobMaxUploadBlobBytes) {
-		setPutListNeed(&c.atomicPutListIndicator, putListNotNeeded)
-		return c.generateStartCopyBlobFromURL(id, blockIndex, adjustedChunkSize)
+	/*
+		 * CopyBlobFromURL does not work with non-block blob as source.
+		 * Below code is commented for this reason.
+		if c.NumChunks() == 1 && adjustedChunkSize <= int64(azblob.BlockBlobMaxUploadBlobBytes) {
+			setPutListNeed(&c.atomicPutListIndicator, putListNotNeeded)
+			return c.generateStartCopyBlobFromURL(id, blockIndex, adjustedChunkSize)
 
-	}
+		}
+	*/
 	setPutListNeed(&c.atomicPutListIndicator, putListNeeded)
 	return c.generatePutBlockFromURL(id, blockIndex, adjustedChunkSize)
 }
