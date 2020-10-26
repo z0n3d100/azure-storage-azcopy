@@ -299,6 +299,13 @@ func (jptm *jobPartTransferMgr) Info() TransferInfo {
 	// does not exceeds 50000 (max number of block per blob)
 	if blockSize == 0 {
 		blockSize = common.DefaultBlockBlobBlockSize
+		if int64(blockSize) > sourceSize && sourceSize != 0 && plan.FromTo == common.EFromTo.GCPBlob() {
+			if sourceSize < 0 {
+				panic(fmt.Errorf("GCP sourceSize cannot be negative\n"))
+			} else {
+				blockSize = int64(sourceSize) / 2
+			}
+		}
 		for ; uint32(sourceSize/blockSize) > common.MaxNumberOfBlocksPerBlob; blockSize = 2 * blockSize {
 			if blockSize > common.BlockSizeThreshold {
 				/*
