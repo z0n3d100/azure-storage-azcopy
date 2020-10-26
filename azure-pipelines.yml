@@ -71,7 +71,6 @@ jobs:
           # the recent release 1.0.0b4 has a breaking change
           pip install azure-core==1.0.0b3
           # acquire the mutex before running live tests to avoid conflicts
-          python ./tool_distributed_mutex.py lock "$(MUTEX_URL)"
           # set the variable to indicate that the mutex was actually acquired
           echo '##vso[task.setvariable variable=isMutexSet]true'
         name: 'Acquire_the_distributed_mutex'
