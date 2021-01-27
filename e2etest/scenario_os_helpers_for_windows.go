@@ -23,20 +23,14 @@
 package e2etest
 
 import (
-<<<<<<< HEAD
-	"os"
-=======
 	"github.com/Azure/azure-storage-azcopy/v10/common"
 	"github.com/Azure/azure-storage-azcopy/v10/ste"
->>>>>>> c33678aa... Fix module import problem for V10
+	"golang.org/x/sys/windows"
+	"os"
 	"path/filepath"
 	"strings"
 	"syscall"
 	"time"
-
-	"github.com/Azure/azure-storage-azcopy/common"
-	"github.com/Azure/azure-storage-azcopy/ste"
-	"golang.org/x/sys/windows"
 )
 
 type osScenarioHelper struct{}

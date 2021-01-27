@@ -25,7 +25,6 @@ import (
 	"crypto/md5"
 	"errors"
 	"fmt"
-	"github.com/Azure/azure-storage-blob-go/azblob"
 	"hash"
 	"net/http"
 	"net/url"
