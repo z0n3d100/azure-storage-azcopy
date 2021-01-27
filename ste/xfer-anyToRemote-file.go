@@ -25,6 +25,7 @@ import (
 	"crypto/md5"
 	"errors"
 	"fmt"
+	"github.com/Azure/azure-storage-blob-go/azblob"
 	"hash"
 	"net/http"
 	"net/url"
@@ -40,13 +41,14 @@ import (
 // This code for blob tier safety is _not_ safe for multiple jobs at once.
 // That's alright, but it's good to know on the off chance.
 // This sync.Once is present to ensure we output information about a S2S access tier preservation failure to stdout once
-var s2sAccessTierFailureLogStdout sync.Once
+var tierNotAllowedFailure sync.Once
 var checkLengthFailureOnReadOnlyDst sync.Once
 
 // This sync.Once and string pair ensures that we only get a user's destination account kind once when handling set-tier
 // Premium block blob doesn't support tiering, and page blobs only support P1-80.
 // There are also size restrictions on tiering.
 var destAccountSKU string
+
 var destAccountKind string
 var tierSetPossibleFail bool
 var getDestAccountInfo sync.Once
@@ -78,7 +80,7 @@ func prepareDestAccountInfo(bURL azblob.BlobURL, jptm IJobPartTransferMgr, ctx c
 	}
 }
 
-// TODO: Infer availability based upon blob size as well, for premium page blobs.
+//// TODO: Infer availability based upon blob size as well, for premium page blobs.
 func BlobTierAllowed(destTier azblob.AccessTierType) bool {
 	// If we failed to get the account info, just return true.
 	// This is because we can't infer whether it's possible or not, and the setTier operation could possibly succeed (or fail)
@@ -114,7 +116,8 @@ func BlobTierAllowed(destTier azblob.AccessTierType) bool {
 	}
 }
 
-func AttemptSetBlobTier(jptm IJobPartTransferMgr, blobTier azblob.AccessTierType, blobURL azblob.BlobURL, ctx context.Context) {
+func ValidateTier(jptm IJobPartTransferMgr, blobTier azblob.AccessTierType, blobURL azblob.BlobURL, ctx context.Context) (isValid bool) {
+
 	if jptm.IsLive() && blobTier != azblob.AccessTierNone {
 		// Set the latest service version from sdk as service version in the context.
 		ctxWithLatestServiceVersion := context.WithValue(ctx, ServiceAPIVersionOverride, azblob.ServiceVersion)
@@ -129,29 +132,16 @@ func AttemptSetBlobTier(jptm IJobPartTransferMgr, blobTier azblob.AccessTierType
 		tierAvailable := BlobTierAllowed(blobTier)
 
 		if tierAvailable {
-			_, err := blobURL.SetTier(ctxWithLatestServiceVersion, blobTier, azblob.LeaseAccessConditions{})
-			if err != nil {
-				// This uses a currently true assumption about the code:
-				// the blobTier passed into this is the destination blob tier, which may be overridden by the user.
-				// If the user overrides the blob tier, S2SSrcBlobTier is not overridden.
-				if jptm.Info().S2SSrcBlobTier == blobTier {
-					jptm.LogTransferInfo(pipeline.LogError, jptm.Info().Source, jptm.Info().Destination, "Failed to replicate blob tier at destination. Try transferring with the flag --s2s-preserve-access-tier=false")
-					s2sAccessTierFailureLogStdout.Do(func() {
-						glcm := common.GetLifecycleMgr()
-						glcm.Info("One or more blobs have failed blob tier replication at the destination. Try transferring with the flag --s2s-preserve-access-tier=false")
-					})
-				}
-
-				// If we know the destination tier is possible, something's wrong and we should error out.
-				if tierSetPossibleFail {
-					jptm.LogTransferInfo(pipeline.LogWarning, jptm.Info().Source, jptm.Info().Destination, "Cannot set destination block blob to the pending access tier ("+string(blobTier)+"), because either the destination account or blob type does not support it. The transfer will still succeed.")
-				} else {
-					jptm.FailActiveSendWithStatus("Setting tier", err, common.ETransferStatus.BlobTierFailure())
-				}
-			}
+			return true
 		} else {
-			jptm.LogTransferInfo(pipeline.LogWarning, jptm.Info().Source, jptm.Info().Destination, "The intended tier ("+string(blobTier)+") isn't available on the destination blob type or storage account, so it was left as the default.")
+			tierNotAllowedFailure.Do(func() {
+				glcm := common.GetLifecycleMgr()
+				glcm.Info("Destination could not accommodate the tier " + string(blobTier) + ". Going ahead with the default tier. In case of service to service transfer, consider setting the flag --s2s-preserve-access-tier=false.")
+			})
+			return false
 		}
+	} else {
+		return false
 	}
 }
 

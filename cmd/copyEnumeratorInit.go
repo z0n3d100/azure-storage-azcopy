@@ -239,6 +239,7 @@ func (cca *cookedCopyCmdArgs) initEnumerator(jobPartOrder common.CopyJobPartOrde
 			cca.s2sPreserveAccessTier,
 			jobPartOrder.Fpo,
 		)
+		transfer.BlobTags = cca.blobTags
 
 		if shouldSendToSte {
 			return addTransfer(&jobPartOrder, transfer, cca)
@@ -279,6 +280,10 @@ func (cca *cookedCopyCmdArgs) isDestDirectory(dst common.ResourceString, ctx *co
 // Initialize the modular filters outside of copy to increase readability.
 func (cca *cookedCopyCmdArgs) initModularFilters() []objectFilter {
 	filters := make([]objectFilter, 0) // same as []objectFilter{} under the hood
+
+	if cca.includeBefore != nil {
+		filters = append(filters, &includeBeforeDateFilter{threshold: *cca.includeBefore})
+	}
 
 	if cca.includeAfter != nil {
 		filters = append(filters, &includeAfterDateFilter{threshold: *cca.includeAfter})
