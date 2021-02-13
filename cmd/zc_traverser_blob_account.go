@@ -42,8 +42,8 @@ type blobAccountTraverser struct {
 	incrementEnumerationCounter enumerationCounterFunc
 }
 
-func (t *blobAccountTraverser) isDirectory(isSource bool) bool {
-	return true // Returns true as account traversal is inherently folder-oriented and recursive.
+func (t *blobAccountTraverser) isDirectory(isSource bool) (bool, error) {
+	return true, nil // Returns true as account traversal is inherently folder-oriented and recursive.
 }
 
 func (t *blobAccountTraverser) listContainers() ([]string, error) {
